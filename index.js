@@ -1,4 +1,6 @@
+
 // VARIABLES
+
 let allContainerCart = document.querySelector('.products')
 
 let containerBuyCart = document.querySelector('.card-items')
@@ -6,6 +8,8 @@ let containerBuyCart = document.querySelector('.card-items')
 let priceTotal = document.querySelector('.price-total')
 
 let amountTotal = document.querySelector('.count-product')
+
+let products = document.querySelector('.products')
 
 let buyThings = []
 let totalCard = 0
@@ -20,13 +24,46 @@ function loadEventListener() {
 
 }
 
+const getProducts = async () => {
+    const response = await fetch("productos.json")
+    const data = await response.json()
+
+    data.forEach((product) => {
+        let cart = document.createElement("div")
+        cart.className = "carts"
+        cart.innerHTML = `
+<div>
+                <img src="${product.imagen}" alt="">
+                <p><span>${product.precio}</span>$</p>
+                </div>
+                <p class="title">${product.titulo}</p>
+                <a href="" data-id="${product.id}" class="btn-add-cart">AÑADIR</a>
+`
+
+        products.appendChild(cart)
+
+    })
+
+}
+
+getProducts()
+
 function addProduct(e) {
     e.preventDefault()
     if (e.target.classList.contains('btn-add-cart')) {
         const selectProduct = e.target.parentElement
         readTheContent(selectProduct)
         let agregado = localStorage.setItem(`PRODUCTO AGREGADO ${Math.random(3).toFixed(2)}`, Math.random(2))
-      
+        Toastify({
+
+            text: "Se agrego un producto",
+            
+            duration: 3000,
+
+            style: {
+                background: "green",
+              }
+            }).showToast();
     }
 }
 
@@ -35,16 +72,26 @@ function deleteProduct(e) {
         const deleteId = e.target.getAttribute('data-id')
 
         buyThings.forEach(value => {
-            if(value.id == deleteId){
-let priceReduce = parseFloat(value.price) * parseFloat(value.amount) 
-totalCard = totalCard - priceReduce
-totalCard = totalCard.toFixed(2)
-console.log(`Producto ${JSON.stringify(buyThings)} ha sido BORRADO`)
+            if (value.id == deleteId) {
+                let priceReduce = parseFloat(value.price) * parseFloat(value.amount)
+                totalCard = totalCard - priceReduce
+                totalCard = totalCard.toFixed(2)
+                console.log(`Producto ${JSON.stringify(buyThings)} ha sido BORRADO`)
             }
             let borrado = localStorage.setItem(`PRODUCTO BORRADO ${Math.random(3).toFixed(2)}`, Math.random(2))
         })
         buyThings = buyThings.filter(product => product.id !== deleteId)
         countProduct--
+        Toastify({
+
+            text: "Se elimino un producto",
+            
+            duration: 3000,
+
+            style: {
+                background: "red",
+              }
+            }).showToast();
     }
     loadHtml()
 }
@@ -59,10 +106,10 @@ function readTheContent(product) {
     }
 
     let datoCompra = localStorage.setItem(infoProduct.title, JSON.stringify(infoProduct))
-   
 
-totalCard = parseFloat(totalCard) + parseFloat(infoProduct.price)
-totalCard = totalCard.toFixed(2) 
+
+    totalCard = parseFloat(totalCard) + parseFloat(infoProduct.price)
+    totalCard = totalCard.toFixed(2)
 
     const exist = buyThings.some(product => product.id === infoProduct.id)
     if (exist) {
@@ -104,7 +151,7 @@ function loadHtml() {
         `
         containerBuyCart.appendChild(row)
 
-        priceTotal.innerHTML =  totalCard
+        priceTotal.innerHTML = totalCard
 
         amountTotal.innerHTML = countProduct
     });
